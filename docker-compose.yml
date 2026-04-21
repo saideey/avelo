@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: avelo_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Avtomatik seed: PostgreSQL bu papkadagi *.sql fayllarni faqat bo'sh
+      # volumda (birinchi startup) bajaradi. Shu sabab boshqa serverda
+      # `docker compose up` qilganda barcha test ma'lumotlari o'z-o'zidan
+      # yuklanadi.
+      - ./api/seed_data:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5741:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: development
+    container_name: avelo_api
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8742:8000"
+    volumes:
+      - ./api:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: avelo_frontend
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "3741:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

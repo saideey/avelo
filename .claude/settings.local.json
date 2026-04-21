@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose *)",
+      "Bash(curl -s http://localhost:8742/api/v1/workshops/)",
+      "Bash(pip install *)",
+      "Bash(python *)",
+      "Bash(docker exec avelo_db *)",
+      "Bash(docker exec avelo_api *)",
+      "Bash(docker exec *)",
+      "Bash(grep *)",
+      "Bash(docker volume *)",
+      "Bash(docker restart *)",
+      "Bash(curl -s http://localhost:8742/health)",
+      "Bash(curl -s \"http://localhost:8742/api/v1/workshops\")",
+      "Bash(curl -s \"http://localhost:8742/api/v1/workshops/list\")",
+      "Bash(curl -s \"http://localhost:8742/api/v1/workshops\" -w \"HTTP:%{http_code}\")",
+      "Bash(curl -sL \"http://localhost:8742/api/v1/workshops/\")"
+    ]
+  }
+}
